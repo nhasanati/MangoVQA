@@ -48,9 +48,26 @@ Quality ranking (best → worst): `Extra Class > Class 1 > Class 2 > Reject`
 pip install -r requirements.txt
 ```
 
-A trained YOLOv11 detection checkpoint is required (see `vqa_lstm_baseline/cfg.py`
-`MODEL_YOLO`); detection weights and the image dataset are **not** included in
-this repository.
+A trained YOLO detection checkpoint and the annotated image dataset are required
+to run the framework; both are hosted externally (see *Model Weights & Data
+Availability* below) and are **not** committed to this code repository.
+
+## Model Weights & Data Availability
+
+The trained detector and the annotated image dataset are available in the
+companion detection repository:
+
+- **Detection weights** (`best.pt`):
+  https://github.com/nhasanati/Mango-YOLO/tree/main/models/train2
+  (direct download:
+  https://github.com/nhasanati/Mango-YOLO/raw/main/models/train2/best.pt).
+  Download it and set `MODEL_YOLO` in `vqa_lstm_baseline/cfg.py` to its path.
+- **Annotated image dataset** (4-class YOLO format):
+  https://github.com/nhasanati/Mango-YOLO/tree/main/data/4-class
+  Place it at `data/4-class/`, then build the VQA JSON with
+  `python vqa/generate_vqa.py`.
+- **Learned LSTM baseline** (`model.pt`): not distributed; reproduce it with
+  `python vqa_lstm_baseline/train.py`.
 
 ## Generate the VQA dataset
 
