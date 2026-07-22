@@ -1,0 +1,31 @@
+# IDE
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Generated artifacts (reproducible via the pipeline scripts)
+vqa_lstm_baseline/cache/
+*.npz
+*.pt
+
+# Dataset (regenerate with vqa/generate_vqa.py)
+data/
+
+# Word / temp
+*.docx
+~$*
+*.tmp

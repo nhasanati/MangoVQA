@@ -1,0 +1,6 @@
+# Tested with the versions below; newer patch releases should also work.
+ultralytics>=8.4.16
+torch>=2.3.0
+opencv-python>=4.9.0
+numpy>=1.26
+streamlit>=1.45.1
