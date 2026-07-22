@@ -1,6 +1,18 @@
-# Tested with the versions below; newer patch releases should also work.
-ultralytics>=8.4.16
-torch>=2.3.0
-opencv-python>=4.9.0
-numpy>=1.26
-streamlit>=1.45.1
+# Exact versions from the tested conda environment (Python 3.10).
+# Pinned for reproducibility; newer patch releases usually also work.
+
+# --- detection + deep learning ---
+ultralytics==8.4.16
+torch==2.3.0
+torchvision==0.18.0
+
+# --- image / numeric ---
+opencv-python==4.10.0.84
+numpy==1.26.4
+pillow==10.4.0
+
+# --- demo app ---
+streamlit==1.45.1
+
+# --- colour calibration utility (vqa/calibrate_color.py) ---
+matplotlib==3.10.3
