@@ -2,7 +2,7 @@
 Pencocok pertanyaan bebas -> tipe templat MangoVQA (rule-based, ID + EN).
 
 Sistem MangoVQA berbasis templat, sehingga teks bebas dari pengguna dipetakan ke
-salah satu dari 18 tipe pertanyaan beserta slotnya (grade / warna / sisi / objek).
+salah satu dari 22 tipe pertanyaan beserta slotnya (grade / warna / sisi / objek).
 
 ===========================================================================
 PIPELINE PEMROSESAN KALIMAT (dapat dikutip di paper)
@@ -15,7 +15,7 @@ PIPELINE PEMROSESAN KALIMAT (dapat dikutip di paper)
                           "apa"    (what/which) -> menanya identitas (grade/warna apa)
                           "berapa" (how many)   -> menanya kuantitas (hitung)
                           "apakah" (yes/no)     -> menanya keberadaan/kelayakan
-  P4. Klasifikasi   : aturan (rule-based) memetakan fitur -> 1 dari 18 tipe.
+  P4. Klasifikasi   : aturan (rule-based) memetakan fitur -> 1 dari 22 tipe.
 
 Fungsi utama:
   extract_features(text) -> dict pipeline P1..P4 (untuk telusur/paper)
@@ -117,6 +117,16 @@ SIDE_WORDS     = ("sisi", "side", "sebelah")   # dicocokkan sbg KATA UTUH (lihat
 def _has_side(t):
     """True bila teks memuat kata sisi UTUH (hindari 'sisi' di dalam 'po-SISI')."""
     return bool(re.search(r"\b(sisi|side|sebelah)\b", t))
+
+
+def _mentions_image(t):
+    """True bila teks menyebut CITRA sebagai keseluruhan ('dalam gambar ini').
+
+    Dipakai sebagai isyarat GLOBAL: tanpa ini, 'ini' pada "…dalam gambar ini"
+    keliru dibaca sebagai penunjuk satu objek dan pertanyaan global
+    grade_color_global tak pernah terjangkau.
+    """
+    return bool(re.search(r"\b(gambar|citra|image|foto|photo|scene)\b", t))
 DOMINANT_WORDS = ("paling banyak", "terbanyak", "dominan", "mayoritas", "most frequent", "most common")
 LARGEST_WORDS  = ("paling besar", "terbesar", "largest", "biggest", "paling gede")
 BEST_WORDS     = ("tertinggi", "terbaik", "highest", "best", "paling bagus", "paling tinggi")
@@ -144,18 +154,28 @@ def detect_intent(t, grade, color, side, is_local):
     if is_local:
         if g(MARKET_WORDS):
             return "object_marketable"
+        if is_color and is_grade:
+            return "object_color_grade"   # "warna DAN kualitas mangga ini" -> komposit
         if is_color:
             return "object_color"
         if g(POS_WORDS):
             return "object_position"
         return "object_grade"                          # default objek: tanya grade
 
+    # --- KOMPOSIT grade+warna untuk SELURUH citra ---
+    # harus diuji sebelum cabang WARNA, sebab is_color juga aktif di sini.
+    if is_color and is_grade and not count and not each:
+        return "grade_color_global"
+
     # --- WARNA --- (dibuat setara dengan alur GRADE)
     if is_color:
         if color is not None:
             return "count_color"          # warna spesifik -> hitung warna itu (mis. "berapa mangga kuning")
-        if each or count:
-            return "color_breakdown"      # "warna apa ... jumlahnya berapa/masing-masing" -> rincian+jumlah
+        if each:
+            return "color_breakdown"      # "warna apa ... jumlahnya masing-masing" -> rincian+jumlah
+        if count:
+            # "berapa jumlah warna" (cacah ragam) vs "warna apa saja ... berapa" (rincian)
+            return "color_breakdown" if which else "count_colors"
         return "which_colors"             # "warna apa (saja)" tanpa hitung -> daftar warna
 
     # --- GRADE + rincian jumlah (breakdown) : "grade ... jumlahnya masing-masing" ---
@@ -190,8 +210,10 @@ def detect_intent(t, grade, color, side, is_local):
             return "count_class"                       # "berapa mangga class 2"
         if color is not None:
             return "count_color"
-        if is_grade and (which or each):
-            return "grade_breakdown"                    # "berapa jumlah tiap grade"
+        if is_grade:
+            if which or each:
+                return "grade_breakdown"                # "grade apa saja & berapa masing-masing"
+            return "count_grades"                       # "berapa jumlah kualitas" -> cacah ragam grade
         return "count_total"                            # "berapa jumlah mangga"
 
     # --- grade apa saja (tanpa kata hitung) ---
@@ -220,7 +242,8 @@ def _find_sample(samples, qtype, lang, grade=None, color=None, side=None, obj=No
     if qtype == "grades_on_side" and side is not None:
         lab = C.SIDE[lang][side]
         cands = [s for s in cands if lab in s["question"]] or cands
-    if qtype in ("object_grade", "object_color", "object_position", "object_marketable"):
+    if qtype in ("object_grade", "object_color", "object_position", "object_marketable",
+                 "object_color_grade"):
         want = obj or "obj_1"
         cands = [s for s in cands if s.get("object_id") == want] or cands
     return cands[0]
@@ -251,8 +274,12 @@ def extract_features(text):
     #   - rincian (masing-masing/each), which (apa saja/which),
     #   - KUANTITAS (berapa/jumlah): pertanyaan lokal per-objek tak pernah menghitung,
     #   - agregat menyeluruh (semua/seluruh/keseluruhan).
+    # 'all' dsb. HARUS dicocokkan sebagai kata utuh: sebagai substring, "all"
+    # ikut cocok di dalam "horizont-ALL-y" dan membuat pertanyaan lokal
+    # object_position (EN) salah dibaca sebagai global.
+    says_all = bool(re.search(r"\b(semua|seluruh|keseluruhan|all)\b", norm))
     strong_global = (gg(COUNT_WORDS) or gg(EACH_WORDS) or gg(WHICH_WORDS)
-                     or any(w in norm for w in ("semua", "seluruh", "keseluruhan", "all")))
+                     or says_all or _mentions_image(norm))
     says_this = bool(re.search(r"\bini\b|\bthis\b", norm))
     is_local = (obj is not None) or (says_this and not strong_global)
 
