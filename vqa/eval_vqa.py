@@ -118,7 +118,11 @@ def system_local_answer(qtype, box, lang):
     if qtype == "object_grade":
         return [C.GRADE_LABEL[lang][cls]]
     if qtype == "object_color":
-        return [CL.color_name(box.get("color", "unknown"), lang)]
+        # Pakai color_list (bukan 'color' primer): buah Reject menghasilkan
+        # [warna_dasar, jenis_cacat] dan gold pun dibangun dari color_list
+        # (generate_vqa.py). Memakai 'color' saja mengunci recall di 0.5.
+        clist = box.get("color_list", [box.get("color", "unknown")])
+        return [CL.color_name(c, lang) for c in clist if c != "unknown"]
     if qtype == "object_position":
         return [G.horizontal_position(box["xc"], lang)]
     if qtype == "object_marketable":
