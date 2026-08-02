@@ -1,4 +1,4 @@
-# MangoVQA — Visual Question Answering for SNI-Based Mango Quality Grading
+# MangoVQA — An Object-Detection-Grounded Multi-Answer Visual Question Answering System for SNI-Based Mango Quality Grading
 
 Code accompanying the study *MangoVQA: A Template-Driven Visual Question
 Answering Framework for Standard-Based Mango Quality Grading*. The framework
