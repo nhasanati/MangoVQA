@@ -24,7 +24,12 @@ python vqa/generate_vqa.py --data-root data/4-class --out data/vqa
 
 Output ke `data/vqa/`:
 - `vqa_train_<lang>.json` — Q&A split train
-- `vqa_test_<lang>.json`  — Q&A split test (dari images/test)
+- `vqa_val_<lang>.json`   — Q&A split val (70 citra; seleksi model baseline LSTM)
+- `vqa_test_<lang>.json`  — Q&A split test (71 citra; semua hasil dilaporkan di sini)
+
+Partisi train/val/test (327/70/71) direkonstruksi dari dataset Mango-YOLO (327/141) dengan
+`python vqa/make_splits.py --source <Mango-YOLO>/data/4-class --out data/4-class`;
+daftar nama file tiap split ada di `data/splits/`.
 - `vqa_stats_<lang>.json` — statistik distribusi
 
 ## Format Sampel

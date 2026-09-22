@@ -16,6 +16,7 @@ provided for comparison.
 
 ```
 vqa/                     Main framework (template / rule-based)
+  make_splits.py         Rebuild the train / val / test image partition from Mango-YOLO
   generate_vqa.py        Build the VQA dataset from YOLO detections (22 question types)
   config.py              Question templates (ID / EN), grade names, quality order
   color.py               HSV-based mango colour analysis (ripeness + defect colours)
@@ -64,10 +65,46 @@ companion detection repository:
   Download it and set `MODEL_YOLO` in `vqa_lstm_baseline/cfg.py` to its path.
 - **Annotated image dataset** (4-class YOLO format):
   https://github.com/nhasanati/Mango-YOLO/tree/main/data/4-class
-  Place it at `data/4-class/`, then build the VQA JSON with
-  `python vqa/generate_vqa.py`.
+  It is released as a 70:30 partition (`images/train` 327, `images/test` 141).
+  MangoVQA uses a finer train / val / test partition — see *Dataset split*
+  below — so rebuild it first with `vqa/make_splits.py`, then build the VQA
+  JSON with `python vqa/generate_vqa.py`.
 - **Learned LSTM baseline** (`model.pt`): not distributed; reproduce it with
   `python vqa_lstm_baseline/train.py`.
+
+## Dataset split
+
+MangoVQA works on the same 468 images as the detection paper but with a
+three-way partition:
+
+| Split | Images | Role in MangoVQA |
+|---|---|---|
+| `train` | 327 | identical to Mango-YOLO `images/train`; trains the LSTM baseline |
+| `val`   | 70  | model selection / early stopping of the LSTM baseline |
+| `test`  | 71  | all reported VQA results (template engine and LSTM baseline) |
+
+`val` and `test` together are exactly the 141-image evaluation partition of
+Mango-YOLO (`images/test`). The template engine has no trainable parameters and
+never touches `train` or `val`; the split exists because the learned baseline
+needs a validation set. The assignment of each image is fixed by the file lists
+in [`data/splits/`](data/splits) (`train.txt`, `val.txt`, `test.txt`, one file
+name per line), so the partition can be rebuilt from the released dataset:
+
+```bash
+git clone https://github.com/nhasanati/Mango-YOLO.git ../Mango-YOLO
+python vqa/make_splits.py --source ../Mango-YOLO/data/4-class --out data/4-class
+```
+
+Two points worth knowing when interpreting the numbers:
+
+- The YOLO detector that feeds the framework selected its checkpoint on the full
+  141-image partition (see the Mango-YOLO README). The 71 `test` images are
+  therefore held out from the LSTM baseline, but not from the detector; the
+  detection and VQA studies share this partition by design so that both are
+  evaluated on the same images.
+- One `val` image (`376c8fb7-reject_10.jpg`) is byte-identical to a training
+  image (`5827c6a2-reject_5.jpg`). It affects only LSTM model selection, not the
+  `test` results; it is kept so the lists match the released dataset.
 
 ## Generate the VQA dataset
 

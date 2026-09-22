@@ -22,8 +22,11 @@ vqa_lstm_baseline/cache/
 *.npz
 *.pt
 
-# Dataset (regenerate with vqa/generate_vqa.py)
+# Dataset (regenerate with vqa/generate_vqa.py) — only the split lists are versioned
 data/
+!data/
+data/*
+!data/splits/
 
 # Word / temp
 *.docx
