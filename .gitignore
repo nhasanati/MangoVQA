@@ -22,11 +22,17 @@ vqa_lstm_baseline/cache/
 *.npz
 *.pt
 
-# Dataset (regenerate with vqa/generate_vqa.py) — only the split lists are versioned
+# Dataset: only the split lists and the released QA JSON (data/vqa/) are versioned
 data/
 !data/
 data/*
 !data/splits/
+!data/vqa/
+data/vqa/*
+!data/vqa/vqa_train_*.json
+!data/vqa/vqa_val_*.json
+!data/vqa/vqa_test_*.json
+!data/vqa/vqa_stats_*.json
 
 # Word / temp
 *.docx

@@ -1,0 +1,41 @@
+{
+  "total_samples": 17764,
+  "by_split": {
+    "train": 12585,
+    "test": 2554,
+    "val": 2625
+  },
+  "by_level": {
+    "global": 14039,
+    "local": 3725
+  },
+  "by_answer_type": {
+    "open_ended": 13705,
+    "multi_label": 4059
+  },
+  "by_question_type": {
+    "count_total": 468,
+    "count_class": 1872,
+    "exist_class": 1872,
+    "which_grades": 468,
+    "dominant": 467,
+    "best_quality": 468,
+    "worst_quality": 468,
+    "largest_grade": 468,
+    "overall": 468,
+    "which_colors": 468,
+    "count_color": 3276,
+    "grades_on_side": 936,
+    "grade_breakdown": 468,
+    "color_breakdown": 468,
+    "count_grades": 468,
+    "count_colors": 468,
+    "grade_color_global": 468,
+    "object_grade": 745,
+    "object_color": 745,
+    "object_position": 745,
+    "object_marketable": 745,
+    "object_color_grade": 745
+  },
+  "multi_label_share": 0.2285
+}

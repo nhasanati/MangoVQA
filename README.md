@@ -51,7 +51,8 @@ pip install -r requirements.txt
 
 A trained YOLO detection checkpoint and the annotated image dataset are required
 to run the framework; both are hosted externally (see *Model Weights & Data
-Availability* below) and are **not** committed to this code repository.
+Availability* below). The VQA question–answer dataset itself is included in
+[`data/vqa/`](data/vqa).
 
 ## Model Weights & Data Availability
 
@@ -67,8 +68,13 @@ companion detection repository:
   https://github.com/nhasanati/Mango-YOLO/tree/main/data/4-class
   It is released as a 70:30 partition (`images/train` 327, `images/test` 141).
   MangoVQA uses a finer train / val / test partition — see *Dataset split*
-  below — so rebuild it first with `vqa/make_splits.py`, then build the VQA
-  JSON with `python vqa/generate_vqa.py`.
+  below — so rebuild it first with `vqa/make_splits.py`. The VQA JSON is
+  already provided (next item); regenerating it is optional.
+- **VQA dataset (17,764 QA pairs)**: committed in this repository under
+  [`data/vqa/`](data/vqa), in English (`*_en.json`) and Indonesian
+  (`*_id.json`) — `vqa_train_*` 12,585, `vqa_val_*` 2,625, `vqa_test_*` 2,554
+  QA pairs, plus `vqa_stats_*.json`. These are the exact files behind the
+  reported results; `vqa/generate_vqa.py` reproduces them from the images.
 - **Learned LSTM baseline** (`model.pt`): not distributed; reproduce it with
   `python vqa_lstm_baseline/train.py`.
 
@@ -108,6 +114,9 @@ Two points worth knowing when interpreting the numbers:
 
 ## Generate the VQA dataset
 
+The released QA files are already in `data/vqa/`. To regenerate them from the
+images (this overwrites those files):
+
 ```bash
 python vqa/generate_vqa.py                 # Indonesian questions (default)
 python vqa/generate_vqa.py --lang en       # English questions
@@ -135,7 +144,8 @@ python vqa_lstm_baseline/evaluate.py       # writes the comparison table
 
 ## Notes
 
-- The dataset JSON files and generated caches are reproducible from the scripts
-  above and are therefore not committed.
+- The VQA dataset JSON is committed in `data/vqa/`; the images, detector
+  weights, and generated caches are not (see *Model Weights & Data
+  Availability*).
 - Evaluation is reported on **decoupled tracks** so honest grade accuracy
   (human ground truth) is never mixed with self-scored colour metrics.
